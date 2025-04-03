@@ -15,19 +15,19 @@ import authMiddleware, { adminMiddleware } from '../middleware/authMiddleware.js
 
 const router = express.Router();
 
-// Admin Authentication
+// ✅ Admin Authentication
 router.post('/register', registerAdmin);
 router.post('/login', loginAdmin);
 
-// ✅ NEW: Admin Authentication Check API
+// ✅ Check Admin Authentication
 router.get('/auth-check', authMiddleware, adminMiddleware, (req, res) => {
   res.status(200).json({ message: "Admin authenticated", admin: req.user });
 });
 
-// Admin User Management
+// ✅ Admin User Management
 router.get('/users', authMiddleware, adminMiddleware, getAllUsers);
 
-// Admin Task Management
+// ✅ Admin Task Management
 router.get('/tasks', authMiddleware, adminMiddleware, getAllTasks);
 router.put('/tasks/:taskId', authMiddleware, adminMiddleware, updateTaskByAdmin);
 router.delete('/tasks/:taskId', authMiddleware, adminMiddleware, deleteTaskByAdmin);

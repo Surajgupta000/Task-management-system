@@ -4,16 +4,24 @@ import axios from "axios";
 const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
   const [tasks, setTasks] = useState([]);
+  const [newTask, setNewTask] = useState({ title: "", description: "", assignedUser: "" });
   const [error, setError] = useState("");
-  const [newTask, setNewTask] = useState({ title: "", description: "" });
 
-  const API_BASE_URL = "http://localhost:5000/api"; // ✅ Define the base URL
+  const API_BASE_URL = "http://localhost:5000/api";
+
+  // ✅ Retrieve token from localStorage
+  const token = localStorage.getItem("adminToken");
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const usersRes = await axios.get(`${API_BASE_URL}/admin/users`); // ✅ Use full URL
-        const tasksRes = await axios.get(`${API_BASE_URL}/admin/tasks`); // ✅ Use full URL
+        const usersRes = await axios.get(`${API_BASE_URL}/admin/users`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const tasksRes = await axios.get(`${API_BASE_URL}/admin/tasks`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
         setUsers(usersRes.data);
         setTasks(tasksRes.data);
       } catch (err) {
@@ -21,68 +29,80 @@ const AdminDashboard = () => {
         console.error("Error fetching data:", err);
       }
     };
-    fetchData();
-  }, []);
 
-  // Create a new task
+    fetchData();
+  }, [token]);
+
+  // ✅ Store token when admin logs in
+  const handleLogin = async (email, password) => {
+    try {
+      const res = await axios.post(`${API_BASE_URL}/admin/login`, { email, password });
+      localStorage.setItem("adminToken", res.data.token);
+      alert("Login successful");
+      window.location.reload(); // Reload page to fetch data
+    } catch (err) {
+      console.error("Login Error:", err);
+      alert("Invalid credentials");
+    }
+  };
+
+  // ✅ Logout function
+  const handleLogout = () => {
+    localStorage.removeItem("adminToken");
+    alert("Logged out");
+    window.location.reload();
+  };
+
+  // ✅ Create Task
   const handleCreateTask = async () => {
-    if (!newTask.title || !newTask.description) {
-      alert("Title and description are required.");
+    if (!newTask.title || !newTask.description || !newTask.assignedUser) {
+      alert("Title, description, and assigned user are required.");
       return;
     }
 
     try {
-      const res = await axios.post(`${API_BASE_URL}/tasks`, newTask); // ✅ Use full URL
+      const res = await axios.post(`${API_BASE_URL}/tasks`, newTask, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
       setTasks([...tasks, res.data]);
-      setNewTask({ title: "", description: "" });
+      setNewTask({ title: "", description: "", assignedUser: "" });
     } catch (err) {
       console.error("Error creating task:", err);
       alert("Failed to create task.");
     }
   };
 
-  // Delete a task
-  const handleDeleteTask = async (taskId) => {
-    try {
-      await axios.delete(`${API_BASE_URL}/admin/tasks/${taskId}`); // ✅ Use full URL
-      setTasks(tasks.filter((task) => task._id !== taskId));
-    } catch (err) {
-      console.error("Error deleting task:", err);
-      alert("Failed to delete task.");
-    }
-  };
-
-  // Update a task
-  const handleUpdateTask = async (taskId, updatedTask) => {
-    try {
-      const res = await axios.put(`${API_BASE_URL}/admin/tasks/${taskId}`, updatedTask); // ✅ Use full URL
-      setTasks(tasks.map((task) => (task._id === taskId ? res.data : task)));
-    } catch (err) {
-      console.error("Error updating task:", err);
-      alert("Failed to update task.");
-    }
-  };
-
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-      <p>Welcome to the admin dashboard. Here you can manage users and tasks.</p>
       {error && <p className="text-red-500">{error}</p>}
 
-      {/* Users List */}
-      <h3 className="text-xl font-semibold mt-4">Users List</h3>
+      {/* Logout Button */}
+      <button onClick={handleLogout} className="bg-red-500 text-white px-4 py-2">Logout</button>
+
+      {/* Users List with Assign Button */}
+      <h3 className="text-xl font-semibold mt-4">Users List (Assign Task)</h3>
       <ul className="list-disc list-inside">
-        {Array.isArray(users) && users.length > 0 ? (
-          users.map((user) => <li key={user._id}>{user.name}</li>)
+        {users.length > 0 ? (
+          users.map((user) => (
+            <li key={user._id} className="flex items-center justify-between p-2 border">
+              <span>{user.name}</span>
+              <button 
+                onClick={() => setNewTask({ ...newTask, assignedUser: user._id })}
+                className="bg-green-500 text-white px-2 py-1"
+              >
+                Assign Task
+              </button>
+            </li>
+          ))
         ) : (
           <p>No users found</p>
         )}
       </ul>
 
-      {/* Task Management */}
-      <h3 className="text-xl font-semibold mt-4">Task Management</h3>
-
       {/* Add New Task */}
+      <h3 className="text-xl font-semibold mt-4">Task Management</h3>
       <div className="mb-4">
         <input
           type="text"
@@ -102,35 +122,6 @@ const AdminDashboard = () => {
           Add Task
         </button>
       </div>
-
-      {/* Task List with Edit & Delete */}
-      <ul className="list-disc list-inside">
-        {Array.isArray(tasks) && tasks.length > 0 ? (
-          tasks.map((task) => (
-            <li key={task._id} className="flex items-center justify-between p-2 border">
-              <span>{task.title}</span>
-              <div>
-                <button
-                  onClick={() =>
-                    handleUpdateTask(task._id, { ...task, title: task.title + " (Updated)" })
-                  }
-                  className="bg-yellow-500 text-white px-2 py-1 mr-2"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleDeleteTask(task._id)}
-                  className="bg-red-500 text-white px-2 py-1"
-                >
-                  Delete
-                </button>
-              </div>
-            </li>
-          ))
-        ) : (
-          <p>No tasks found</p>
-        )}
-      </ul>
     </div>
   );
 };
