@@ -4,87 +4,60 @@ const API_URL = "http://localhost:5000/api";
 
 // Register User
 export const registerUser = async (name, email, password) => {
-  try {
-    const response = await axios.post(`${API_URL}/users/register`, { 
-      name, 
-      email, 
-      password
-    });
-    return response.data;
-  } catch (error) {
-    throw error.response?.data?.message || "Registration failed";
-  }
+  const response = await axios.post(`${API_URL}/users/register`, { 
+    name, 
+    email, 
+    password 
+  });
+  return response.data;
 };
 
 // Register Admin
 export const registerAdmin = async (name, email, password) => {
-  try {
-    const response = await axios.post(`${API_URL}/admin/register`, { 
-      name, 
-      email, 
-      password
-    });
-    return response.data;
-  } catch (error) {
-    throw error.response?.data?.message || "Registration failed";
-  }
+  const response = await axios.post(`${API_URL}/admin/register`, { 
+    name, 
+    email, 
+    password 
+  });
+  return response.data;
 };
 
 // Login User
 export const loginUser = async (email, password) => {
-  try {
-    console.log("Login Request Data Before Sending:", email, password);
+  const response = await axios.post(`${API_URL}/users/login`, { 
+    email, 
+    password 
+  });
 
-    const response = await axios.post(`${API_URL}/users/login`, { 
-      email: String(email),  
-      password: String(password),
-      role: 'user' // Include role in the login request
-    }, {
-      headers: { "Content-Type": "application/json" },
-    });
+  // ✅ Store in localStorage
+  localStorage.setItem("userToken", response.data.token);
+  localStorage.setItem("userRole", "user");
 
-    console.log("Login Response:", response.data);
-
-    // Store token in localStorage
-    localStorage.setItem("userToken", response.data.token);
-
-    return response.data;
-  } catch (error) {
-    console.error("Login Error:", error.response?.data || error.message);
-    throw error.response?.data?.message || "Login failed";
-  }
+  return response.data;
 };
 
 // Login Admin
 export const loginAdmin = async (email, password) => {
-  try {
-    console.log("Admin Login Request Data:", email, password);
+  const response = await axios.post(`${API_URL}/admin/login`, { 
+    email, 
+    password 
+  });
 
-    const response = await axios.post(`${API_URL}/admin/login`, { 
-      email: String(email),  
-      password: String(password),
-      role: 'admin' // Include role in the login request
-    }, {
-      headers: { "Content-Type": "application/json" },
-    });
+  // ✅ Store in localStorage
+  localStorage.setItem("adminToken", response.data.token);
+  localStorage.setItem("userRole", "admin");
 
-    console.log("Admin Login Response:", response.data);
-
-    // Store token in localStorage
-    localStorage.setItem("adminToken", response.data.token);
-
-    return response.data;
-  } catch (error) {
-    console.error("Admin Login Error:", error.response?.data || error.message);
-    throw error.response?.data?.message || "Admin login failed";
-  }
+  return response.data;
 };
 
 // Logout User
-export const logout = () => {
-  localStorage.removeItem("authToken"); // Remove auth token
-  localStorage.removeItem("userRole");  // If role-based access
-  setUser(null);
-  navigate("/login"); // Redirect to login
-};
+export const logout = (navigate = () => {}, setUser) => { // ✅ Add default navigate
+  console.log("Logging out...");
 
+  localStorage.removeItem("userToken");
+  localStorage.removeItem("adminToken");
+  localStorage.removeItem("userRole");
+
+  if (setUser) setUser(null);
+  navigate("/login");
+};

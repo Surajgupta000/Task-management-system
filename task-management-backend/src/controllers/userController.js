@@ -33,7 +33,7 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({ message: 'Invalid user data' });
     }
 
-    const token = jwt.sign({ id: user._id, role: 'user' }, process.env.JWT_SECRET, { expiresIn: '3h' });
+    const token = jwt.sign({ id: user._id, role: 'user' }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
     res.status(201).json({ _id: user._id, name: user.name, email: user.email, role: 'user', token });
 
@@ -63,7 +63,7 @@ export const loginUser = async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    const token = jwt.sign({ id: user._id, role: 'user' }, process.env.JWT_SECRET, { expiresIn: "1h" });
+    const token = jwt.sign({ id: user._id, role: 'user' }, process.env.JWT_SECRET, { expiresIn: "7d" });
 
     console.log("User Login Successful:", user.email);
     res.status(200).json({ _id: user._id, name: user.name, email: user.email, role: 'user', token });

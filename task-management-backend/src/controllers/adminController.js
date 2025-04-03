@@ -25,7 +25,7 @@ export const registerAdmin = async (req, res) => {
 
     if (!admin) return res.status(400).json({ message: 'Invalid admin data' });
 
-    const token = jwt.sign({ id: admin._id, role: 'admin' }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ id: admin._id, role: 'admin' }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
     res.status(201).json({ _id: admin._id, name: admin.name, email: admin.email, role: 'admin', token });
 
@@ -54,7 +54,7 @@ export const loginAdmin = async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    const token = jwt.sign({ id: admin._id, role: 'admin' }, process.env.JWT_SECRET, { expiresIn: "1h" });
+    const token = jwt.sign({ id: admin._id, role: 'admin' }, process.env.JWT_SECRET, { expiresIn: "7d" });
 
     res.status(200).json({ _id: admin._id, name: admin.name, email: admin.email, role: 'admin', token });
 

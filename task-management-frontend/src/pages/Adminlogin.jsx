@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginAdmin } from "../api/auth";
+import { AuthContext } from "../context/AuthContext";
 
 const AdminLogin = () => {
+  const { login } = useContext(AuthContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -15,17 +17,17 @@ const AdminLogin = () => {
     try {
       console.log("Submitting Admin Login:", { email, password });
 
-      const response = await loginAdmin(email, password);
+      const data = await loginAdmin(email, password);
+      console.log("Admin Login Successful. Token Received:", data.token);
 
-      console.log("Admin Login Successful. Token Received:", response.token);
+      login(data);
 
-      localStorage.setItem("adminToken", response.token);
-
-      console.log("Navigating to Admin Dashboard...");
-      navigate("/admin");  // Redirect to admin dashboard after login
+      navigate("/admin");
     } catch (err) {
-      console.error("Admin Login Error:", err.response?.data || err.message);
-      setError(err.response?.data?.message || "Admin login failed. Try again.");
+      console.error("Admin Login Error:", err);
+      
+      // ✅ Fix: Convert error to string
+      setError(err?.message || "Admin login failed. Try again.");
     }
   };
 
@@ -62,9 +64,6 @@ const AdminLogin = () => {
             Login
           </button>
         </form>
-        <p className="mt-4 text-center text-sm">
-          Don't have an account? <a href="/admin/signup" className="text-blue-500">Register</a>
-        </p>
       </div>
     </div>
   );

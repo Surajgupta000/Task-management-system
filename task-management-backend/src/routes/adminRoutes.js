@@ -19,6 +19,11 @@ const router = express.Router();
 router.post('/register', registerAdmin);
 router.post('/login', loginAdmin);
 
+// ✅ NEW: Admin Authentication Check API
+router.get('/auth-check', authMiddleware, adminMiddleware, (req, res) => {
+  res.status(200).json({ message: "Admin authenticated", admin: req.user });
+});
+
 // Admin User Management
 router.get('/users', authMiddleware, adminMiddleware, getAllUsers);
 

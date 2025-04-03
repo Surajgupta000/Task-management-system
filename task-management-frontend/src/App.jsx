@@ -1,27 +1,36 @@
-import React from "react";
-import { Route, Routes } from "react-router-dom";
+import React, { useContext } from "react";
+import { Route, Routes, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
-import Home from "./pages/Home"; // Import Home component
+import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
-import AdminDashboard from "./pages/Admindashboard"; // Import AdminDashboard component
-import AdminLogin from "./pages/Adminlogin"; // Import AdminLogin component
-import AdminSignup from "./pages/Adminsignup"; // Import AdminSignup component
+import AdminDashboard from "./pages/Admindashboard";
+import AdminLogin from "./pages/Adminlogin";
+import AdminSignup from "./pages/Adminsignup";
+import { AuthContext } from "./context/AuthContext";
 
 function App() {
+  const { user } = useContext(AuthContext);
+
   return (
     <>
-      <Navbar />  {/* ✅ Navbar is outside Routes */}
+      <Navbar />
       <Routes>
-        <Route path="/" element={<Home />} /> {/* Set Home as the default route */}
+        <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/dashboard" element={<Dashboard />} /> {/* ✅ Dashboard is accessible at /dashboard */}
         <Route path="/register" element={<Register />} />
-        <Route path="/admin" element={<AdminDashboard />} /> {/* Admin Dashboard */}
-        <Route path="/admin/login" element={<AdminLogin />} /> {/* Admin Login */}
-        <Route path="/admin/signup" element={<AdminSignup />} /> {/* Admin Signup */}
+
+        {/* ✅ Protected User Dashboard */}
+        <Route path="/dashboard" element={user?.role === "user" ? <Dashboard /> : <Navigate to="/login" />} />
+
+        {/* ✅ Protected Admin Dashboard */}
+        <Route path="/admin" element={user?.role === "admin" ? <AdminDashboard /> : <Navigate to="/admin/login" />} />
+        
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin/signup" element={<AdminSignup />} />
+
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>

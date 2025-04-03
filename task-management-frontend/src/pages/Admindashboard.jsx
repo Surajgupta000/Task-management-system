@@ -7,11 +7,13 @@ const AdminDashboard = () => {
   const [error, setError] = useState("");
   const [newTask, setNewTask] = useState({ title: "", description: "" });
 
+  const API_BASE_URL = "http://localhost:5000/api"; // ✅ Define the base URL
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const usersRes = await axios.get("/api/admin/users");
-        const tasksRes = await axios.get("/api/admin/tasks"); // Updated to fetch all tasks
+        const usersRes = await axios.get(`${API_BASE_URL}/admin/users`); // ✅ Use full URL
+        const tasksRes = await axios.get(`${API_BASE_URL}/admin/tasks`); // ✅ Use full URL
         setUsers(usersRes.data);
         setTasks(tasksRes.data);
       } catch (err) {
@@ -30,7 +32,7 @@ const AdminDashboard = () => {
     }
 
     try {
-      const res = await axios.post("/api/tasks", newTask);
+      const res = await axios.post(`${API_BASE_URL}/tasks`, newTask); // ✅ Use full URL
       setTasks([...tasks, res.data]);
       setNewTask({ title: "", description: "" });
     } catch (err) {
@@ -42,7 +44,7 @@ const AdminDashboard = () => {
   // Delete a task
   const handleDeleteTask = async (taskId) => {
     try {
-      await axios.delete(`/api/admin/tasks/${taskId}`);
+      await axios.delete(`${API_BASE_URL}/admin/tasks/${taskId}`); // ✅ Use full URL
       setTasks(tasks.filter((task) => task._id !== taskId));
     } catch (err) {
       console.error("Error deleting task:", err);
@@ -53,7 +55,7 @@ const AdminDashboard = () => {
   // Update a task
   const handleUpdateTask = async (taskId, updatedTask) => {
     try {
-      const res = await axios.put(`/api/admin/tasks/${taskId}`, updatedTask);
+      const res = await axios.put(`${API_BASE_URL}/admin/tasks/${taskId}`, updatedTask); // ✅ Use full URL
       setTasks(tasks.map((task) => (task._id === taskId ? res.data : task)));
     } catch (err) {
       console.error("Error updating task:", err);

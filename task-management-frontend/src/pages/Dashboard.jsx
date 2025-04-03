@@ -33,7 +33,12 @@ const Dashboard = () => {
       <h1 className="text-2xl font-bold">Your Tasks</h1>
       <div className="mt-4">
         {tasks.map((task) => (
-          <TaskCard key={task._id} task={task} onDelete={handleDelete} />
+          <TaskCard
+            key={task._id}
+            task={task}
+            onDelete={handleDelete}
+            onEdit={() => console.log("Edit task:", task)} // ✅ Add placeholder onEdit function
+          />
         ))}
       </div>
     </div>
